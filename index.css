@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg:         #0f1117;
+    --color-surface-1:  #161b22;
+    --color-surface-2:  #1c2333;
+    --color-surface-3:  #21262d;
+    --color-border:     #30363d;
+    --color-brand:      #10b981;
+    --color-brand-dim:  #059669;
+    --color-accent:     #22d3ee;
+    --color-text:       #e6edf3;
+    --color-muted:      #7d8590;
+  }
+
+  * {
+    @apply border-[#30363d];
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-surface text-white min-h-screen;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #484f58;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
+           bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-surface;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
+           bg-surface-3 hover:bg-surface-4 text-white font-semibold text-sm border border-[#30363d]
+           transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-surface;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           text-[#7d8590] hover:text-white hover:bg-surface-3 font-medium text-sm
+           transition-all duration-150 focus:outline-none;
+  }
+
+  .card {
+    @apply bg-surface-1 border border-[#30363d] rounded-xl p-6;
+  }
+
+  .card-hover {
+    @apply card hover:border-brand-500/40 hover:bg-surface-2 transition-all duration-200 cursor-pointer;
+  }
+
+  .input-base {
+    @apply w-full bg-surface-3 border border-[#30363d] rounded-lg px-4 py-3 text-white
+           placeholder-[#7d8590] text-sm
+           focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent
+           transition-all duration-150;
+  }
+
+  .label-base {
+    @apply block text-sm font-medium text-[#e6edf3] mb-1.5;
+  }
+
+  .error-text {
+    @apply text-xs text-accent-rose mt-1;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
+  }
+
+  .section-heading {
+    @apply text-2xl font-bold text-white;
+  }
+
+  .xp-bar {
+    @apply w-full bg-surface-3 rounded-full h-2 overflow-hidden;
+  }
+
+  .xp-bar-fill {
+    @apply h-full bg-gradient-to-r from-brand-500 to-accent-cyan rounded-full transition-all duration-700;
+  }
+
+  .skeleton {
+    @apply bg-surface-3 rounded animate-pulse;
+    background: linear-gradient(90deg, #21262d 25%, #2d333b 50%, #21262d 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #10b981, #22d3ee);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+  }
+}

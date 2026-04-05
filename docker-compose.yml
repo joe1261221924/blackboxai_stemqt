@@ -1,0 +1,114 @@
+version: "3.9"
+
+# ---------------------------------------------------------------------------
+# STEMQuest — local development / CI compose stack
+# ---------------------------------------------------------------------------
+# Start everything:  docker compose up --build
+# Run migrations:    docker compose run --rm api flask db upgrade
+# Seed:              docker compose run --rm api flask seed
+# ---------------------------------------------------------------------------
+
+services:
+
+  # ── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       stemquest
+      POSTGRES_USER:     stemquest
+      POSTGRES_PASSWORD: stemquest
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stemquest -d stemquest"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis 7 ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Flask API (gunicorn + gevent) ─────────────────────────────────────────
+  api:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      FLASK_ENV:       production
+      DATABASE_URL:    postgresql://stemquest:stemquest@postgres:5432/stemquest
+      REDIS_URL:       redis://redis:6379/0
+      RATELIMIT_STORAGE_URL: redis://redis:6379/1
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── RQ worker (background task processor) ────────────────────────────────
+  worker:
+    build:
+      context: .
+      target: runtime
+    restart: unless-stopped
+    command: ["python", "worker.py"]
+    env_file: .env
+    environment:
+      FLASK_ENV:    production
+      DATABASE_URL: postgresql://stemquest:stemquest@postgres:5432/stemquest
+      REDIS_URL:    redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── DB migrations (one-shot — runs and exits) ─────────────────────────────
+  migrate:
+    build:
+      context: .
+      target: runtime
+    command: ["flask", "db", "upgrade"]
+    env_file: .env
+    environment:
+      FLASK_ENV:    production
+      DATABASE_URL: postgresql://stemquest:stemquest@postgres:5432/stemquest
+      REDIS_URL:    redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate   # run with: docker compose --profile migrate up migrate
+
+volumes:
+  pg_data:
+  redis_data:

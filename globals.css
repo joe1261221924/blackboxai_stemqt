@@ -1,0 +1,7 @@
+/*
+ * STEMQuest — styles/globals.css
+ * Re-exports app/globals.css so that any tooling or component that resolves
+ * from styles/ also picks up the correct theme tokens.
+ * The canonical source of truth is app/globals.css.
+ */
+@import '../app/globals.css';
